@@ -104,11 +104,21 @@
           <div class="card">
             <div class="card-icon">&#x1F4DA;</div>
             <h3>Archive Migration</h3>
-            <span class="badge">Coming Soon</span>
             <p>
-              Full message-history copy from Discord to Stoat, preserving
-              timestamps, attachments, and thread structure. Ideal for permanent
-              archival and search.
+              Full message-history export from Discord and import to Stoat, preserving
+              timestamps, attachments, reply chains, and embeds. Pause, resume,
+              and monitor via slash commands or the HTTP API.
+            </p>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="card">
+            <div class="card-icon">&#x1F500;</div>
+            <h3>Reaction &amp; Typing Sync</h3>
+            <p>
+              Bidirectional emoji reaction forwarding and typing indicator relay
+              with echo prevention and debounce. Channel name and topic changes
+              sync automatically.
             </p>
           </div>
         </div>
@@ -170,6 +180,187 @@ bun run start</code></pre>
           </a>
           for full configuration options.
         </p>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── Documentation ───────────────────────── -->
+    <section class="docs" id="docs">
+      <div class="container">
+        <h2 class="section-title">Documentation</h2>
+
+        <!-- Bridge Setup -->
+        <div class="docs-block">
+          <h3 id="bridge-setup">Bridge Setup</h3>
+          <p>Link a Discord guild to a Stoat server, then bridge individual channels.</p>
+
+          <h4>Step 1 — Link Servers</h4>
+          <p>On Stoat, a server admin generates a one-time claim code:</p>
+          <div class="code-block"><pre><code>!stoatcord code</code></pre></div>
+          <p>On Discord, an admin claims it and runs the migration wizard:</p>
+          <div class="code-block"><pre><code>/migrate claim_code:ABC123</code></pre></div>
+          <p>This creates matching channels and roles on Stoat. Options:</p>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Option</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>mode</code></td><td><code>missing</code> (default), <code>full</code>, <code>roles</code>, or <code>categories</code></td></tr>
+                <tr><td><code>dry_run</code></td><td>Preview without making changes</td></tr>
+                <tr><td><code>include_snapshot</code></td><td>Post full server data to #migration-log</td></tr>
+                <tr><td><code>include_media</code></td><td>Upload server icon, banner, emoji images</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Step 2 — Link Channels</h4>
+          <p>In each Discord channel you want to bridge:</p>
+          <div class="code-block"><pre><code>/link stoat_channel_id:01ABC123DEF456</code></pre></div>
+          <p>Messages, edits, deletes, reactions, typing indicators, and channel metadata changes sync bidirectionally.</p>
+          <div class="code-block"><pre><code><span class="code-comment"># Check what's linked</span>
+/status
+
+<span class="code-comment"># Remove a channel bridge</span>
+/unlink</code></pre></div>
+        </div>
+
+        <!-- Archive Migration -->
+        <div class="docs-block">
+          <h3 id="archive">Archive &amp; History Migration</h3>
+          <p>Export Discord channel history and optionally import it into a Stoat channel.</p>
+
+          <h4>Discord Slash Commands</h4>
+          <div class="code-block"><pre><code><span class="code-comment"># Export + import in one step</span>
+/archive start stoat_channel_id:01ABC123DEF456
+
+<span class="code-comment"># Export only (no import)</span>
+/archive start
+
+<span class="code-comment"># Check job status</span>
+/archive status
+
+<span class="code-comment"># Pause / resume a running job</span>
+/archive pause job_id:abc123
+/archive resume job_id:abc123</code></pre></div>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Option</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>stoat_channel_id</code></td><td>Target Stoat channel (omit for export-only)</td></tr>
+                <tr><td><code>rehost_attachments</code></td><td>Re-upload Discord files to Stoat CDN</td></tr>
+                <tr><td><code>preserve_embeds</code></td><td>Convert Discord embeds to Stoat format</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>From Stoat</h4>
+          <div class="code-block"><pre><code>!stoatcord archive</code></pre></div>
+        </div>
+
+        <!-- Stoat Commands -->
+        <div class="docs-block">
+          <h3 id="stoat-commands">Stoat Commands</h3>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Command</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>!stoatcord code</code></td><td>Generate a one-time migration claim code (admin)</td></tr>
+                <tr><td><code>!stoatcord request &lt;guild_id&gt;</code></td><td>Send a live migration approval request to Discord</td></tr>
+                <tr><td><code>!stoatcord status</code></td><td>Show bridge link status for this server</td></tr>
+                <tr><td><code>!stoatcord archive</code></td><td>Show archive job status for the linked guild</td></tr>
+                <tr><td><code>!stoatcord ping &lt;user_id&gt;</code></td><td>Test push notifications for a user</td></tr>
+                <tr><td><code>!stoatcord diag</code></td><td>Run notification diagnostics</td></tr>
+                <tr><td><code>!stoatcord help</code></td><td>Show command list</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Discord Commands -->
+        <div class="docs-block">
+          <h3 id="discord-commands">Discord Slash Commands</h3>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Command</th><th>Permission</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>/migrate</code></td><td>Administrator</td><td>Run the server migration wizard</td></tr>
+                <tr><td><code>/link</code></td><td>Manage Channels</td><td>Bridge a Discord channel to a Stoat channel</td></tr>
+                <tr><td><code>/unlink</code></td><td>Manage Channels</td><td>Remove a channel bridge</td></tr>
+                <tr><td><code>/status</code></td><td>Everyone</td><td>Show bridge status for this server</td></tr>
+                <tr><td><code>/archive</code></td><td>Administrator</td><td>Export/import message history</td></tr>
+                <tr><td><code>/token</code></td><td>Administrator</td><td>View or regenerate guild API token</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- HTTP API -->
+        <div class="docs-block">
+          <h3 id="api">HTTP API</h3>
+          <p>
+            The bot exposes a REST API at <code>api.stoatcord.com</code>.
+            Public endpoints like <code>/api/diag</code> require no auth.
+            Archive endpoints require a per-guild Bearer token (get it with <code>/token</code> in Discord).
+          </p>
+
+          <h4>Public Endpoints</h4>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>GET</code></td><td><code>/api/diag</code></td><td>Bot health &amp; diagnostics</td></tr>
+                <tr><td><code>GET</code></td><td><code>/api/push/vapid</code></td><td>VAPID public key for WebPush</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Archive Endpoints (Bearer token required)</h4>
+          <div class="code-block"><pre><code><span class="code-comment"># Get your token from Discord</span>
+/token
+
+<span class="code-comment"># Check archive status</span>
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://api.stoatcord.com/api/archive/status
+
+<span class="code-comment"># Start an export</span>
+curl -X POST \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"discordChannelId":"123456789"}' \
+  https://api.stoatcord.com/api/archive/start
+
+<span class="code-comment"># Pause / Resume</span>
+curl -X POST \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"jobId":"abc12345"}' \
+  https://api.stoatcord.com/api/archive/pause</code></pre></div>
+
+          <h4>Push Registration</h4>
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>POST</code></td><td><code>/api/push/register</code></td><td>Register a device for push (FCM or WebPush)</td></tr>
+                <tr><td><code>DELETE</code></td><td><code>/api/push/unregister</code></td><td>Remove a device registration</td></tr>
+                <tr><td><code>GET</code></td><td><code>/api/push/status?deviceId=…</code></td><td>Check device registration status</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Masquerade -->
+        <div class="docs-block">
+          <h3 id="masquerade">How Masquerade Works</h3>
+          <p>
+            When messages cross the bridge, the bot uses platform-native impersonation
+            to preserve the original sender's identity:
+          </p>
+          <ul class="docs-list">
+            <li><strong>Discord → Stoat:</strong> Messages are sent via the Stoat <code>masquerade</code> API field, which displays the Discord user's name and avatar on the Stoat message. The message is owned by the bot but renders as the original user.</li>
+            <li><strong>Stoat → Discord:</strong> Messages are sent via a Discord webhook, which can set an arbitrary username and avatar URL. The message appears as the Stoat user.</li>
+          </ul>
+          <p>Neither method grants the bot access to the impersonated user's account or permissions.</p>
+        </div>
+
       </div>
     </section>
 
@@ -480,6 +671,100 @@ bun run start</code></pre>
     color: #7a7a92;
   }
 
+  /* ── Documentation ──────────────────────────────────────── */
+  .docs {
+    padding: 80px 0;
+  }
+
+  .docs-block {
+    margin-bottom: 48px;
+  }
+
+  .docs-block h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #f0f0f5;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1e1e2e;
+  }
+
+  .docs-block h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #c8c8d8;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .docs-block p {
+    font-size: 0.95rem;
+    color: #9191a8;
+    margin-bottom: 12px;
+    line-height: 1.65;
+  }
+
+  .docs-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+
+  .docs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .docs-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: #12121a;
+    color: #a1a1b5;
+    font-weight: 600;
+    border-bottom: 1px solid #1e1e2e;
+  }
+
+  .docs-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #161622;
+    color: #c8c8d8;
+  }
+
+  .docs-table code {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono',
+      Consolas, 'Courier New', monospace;
+    font-size: 0.82rem;
+    background: #1a1a28;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #a78bfa;
+  }
+
+  .docs-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+
+  .docs-list li {
+    font-size: 0.95rem;
+    color: #9191a8;
+    padding: 6px 0 6px 20px;
+    position: relative;
+    line-height: 1.65;
+  }
+
+  .docs-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6366f1;
+  }
+
   /* ── Footer ──────────────────────────────────────────────── */
   .footer {
     padding: 40px 0;
@@ -510,7 +795,8 @@ bun run start</code></pre>
 
     .features,
     .architecture,
-    .quickstart {
+    .quickstart,
+    .docs {
       padding: 56px 0;
     }
 
